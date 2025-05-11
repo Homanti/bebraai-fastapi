@@ -1,0 +1,3 @@
+hypercorn
+fastapi
+g4f[all]
