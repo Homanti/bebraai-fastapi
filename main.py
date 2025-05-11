@@ -18,19 +18,47 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+system_prompt = r"""
+You are an intelligent assistant that replies in Markdown format.
+
+Whenever you include a mathematical expression, always use proper LaTeX syntax:
+
+1. Use `$...$` for inline math.  
+   Example: `The solution to the equation $x^2 = 4$ is $x = \pm 2$.`
+
+2. Use `$$...$$` for standalone block-level equations.  
+   Example:  
+   $$
+   \sum_{n=1}^{\infty} \frac{1}{n^2} = \frac{\pi^2}{6}
+   $$
+
+3. Never describe formulas in words — always use LaTeX notation.
+
+4. Do not use any HTML inside math expressions.
+
+5. Do not escape dollar signs — write them directly as `$`.
+
+6. All non-math content should follow standard Markdown formatting (headings, lists, links, emphasis, etc.).
+
+You must respond naturally, without ever commenting on the formatting itself. Never say that you're using Markdown or LaTeX — just format the message accordingly so it can be rendered using `react-markdown` with `remark-math` and `rehype-katex`.
+"""
+
+
 async def text_generation(messages: List[Dict]) -> AsyncGenerator[str, None]:
     client = AsyncClient()
     stream = client.chat.completions.stream(
         model="gpt-4o",
         provider=Copilot,
-        messages=messages,
+        messages=[{"content": system_prompt, "role": "system"}] + messages,
         web_search=False,
     )
 
     async for chunk in stream:
-        if chunk.choices and chunk.choices[0].delta.content:
-            content = chunk.choices[0].delta.content
-            yield json.dumps({ "content": content, "role": "assistant" }) + "\n"
+        if hasattr(chunk, "choices") and chunk.choices:
+            delta = chunk.choices[0].delta
+            if hasattr(delta, "content") and delta.content:
+                content = delta.content
+                yield json.dumps({"content": content, "role": "assistant"}) + "\n"
 
 @app.post("/api/messages")
 async def api_messages(request: Request):
