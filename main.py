@@ -1,16 +1,12 @@
-# import uvicorn
-from fastapi import FastAPI, File, Form, UploadFile
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, File, Form, UploadFile, Request
+from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, AsyncGenerator
 import json
 from g4f import AsyncClient
 from g4f.Provider import PollinationsAI
-from typing import Optional
-
 app = FastAPI()
 
-# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -40,10 +36,11 @@ Whenever you include a mathematical expression, always use proper LaTeX syntax:
 5. Do not escape dollar signs — write them directly as `$`.
 
 6. All non-math content should follow standard Markdown formatting (headings, lists, links, emphasis, etc.).
-
-You must respond naturally, without ever commenting on the formatting itself. Never say that you're using Markdown or LaTeX — just format the message accordingly so it can be rendered using `react-markdown` with `remark-math` and `rehype-katex`.
 """
 
+@app.options("/api/messages")
+async def preflight_handler(request: Request):
+    return JSONResponse(status_code=200, content={"ok": True})
 
 async def text_generation(messages: List[Dict], files) -> AsyncGenerator[str, None]:
     client = AsyncClient()
@@ -63,29 +60,25 @@ async def text_generation(messages: List[Dict], files) -> AsyncGenerator[str, No
                 content = delta.content
                 yield json.dumps({"content": content, "role": "assistant"}) + "\n"
 
+
+# Основной endpoint
 @app.post("/api/messages")
 async def api_messages(
     messages: str = Form(...),
-    files: Optional[List[UploadFile]] = File(None)
+    files: List[UploadFile] = File(default=[])
 ):
     try:
         parsed_messages = json.loads(messages)
 
         processed_files = []
-        if files:
-            for f in files:
-                content = await f.read()
-                processed_files.append([content, f.filename])
-
-        print("FILES:", [f.filename for f in files])
-        print("MESSAGES:", messages)
+        for f in files:
+            content = await f.read()
+            processed_files.append([content, f.filename])
 
         return StreamingResponse(
             text_generation(parsed_messages, processed_files),
             media_type="application/jsonlines"
         )
-    except Exception as e:
-        return {"error": str(e)}
 
-# if __name__ == "__main__":
-#     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
