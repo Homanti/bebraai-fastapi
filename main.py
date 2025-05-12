@@ -1,11 +1,12 @@
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, AsyncGenerator
 import json
 from g4f import AsyncClient
-from g4f.Provider import Copilot
+from g4f.Provider import PollinationsAI
+from typing import Optional
 
 app = FastAPI()
 
@@ -44,12 +45,14 @@ You must respond naturally, without ever commenting on the formatting itself. Ne
 """
 
 
-async def text_generation(messages: List[Dict]) -> AsyncGenerator[str, None]:
+async def text_generation(messages: List[Dict], files) -> AsyncGenerator[str, None]:
     client = AsyncClient()
+
     stream = client.chat.completions.stream(
         model="gpt-4o",
-        provider=Copilot,
+        provider=PollinationsAI,
         messages=[{"content": system_prompt, "role": "system"}] + messages,
+        images=files,
         web_search=False,
     )
 
@@ -61,19 +64,23 @@ async def text_generation(messages: List[Dict]) -> AsyncGenerator[str, None]:
                 yield json.dumps({"content": content, "role": "assistant"}) + "\n"
 
 @app.post("/api/messages")
-async def api_messages(request: Request):
+async def api_messages(
+    messages: str = Form(...),
+    files: Optional[List[UploadFile]] = File(None)
+):
     try:
-        body = await request.json()
+        parsed_messages = json.loads(messages)
 
-        if not isinstance(body, list):
-            return {"error": "Request body must be a list of messages."}
+        processed_files = []
+        if files:
+            for f in files:
+                content = await f.read()
+                processed_files.append([content, f.filename])
 
-        for msg in body:
-            if not isinstance(msg, dict) or "role" not in msg or "content" not in msg:
-                return {"error": "Each message must be a dict with 'role' and 'content'."}
-
-        return StreamingResponse(text_generation(body), media_type="application/jsonlines")
-
+        return StreamingResponse(
+            text_generation(parsed_messages, processed_files),
+            media_type="application/jsonlines"
+        )
     except Exception as e:
         return {"error": str(e)}
 
