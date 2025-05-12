@@ -1,3 +1,4 @@
-hypercorn
-fastapi
+uvicorn
+fastapi[all]
 g4f[all]
+typing-extensions
