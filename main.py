@@ -1,4 +1,5 @@
-from fastapi import FastAPI, File, Form, UploadFile, Request
+# import uvicorn
+from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, AsyncGenerator
@@ -43,10 +44,6 @@ Whenever you include a mathematical expression, always use proper LaTeX syntax:
 6. All non-math content should follow standard Markdown formatting (headings, lists, links, emphasis, etc.).
 """
 
-@app.options("/api/messages")
-async def preflight_handler(request: Request):
-    return JSONResponse(status_code=200, content={"ok": True})
-
 async def text_generation(messages: List[Dict], files) -> AsyncGenerator[str, None]:
     client = AsyncClient()
 
@@ -85,3 +82,6 @@ async def api_messages(
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
+
+# if __name__ == '__main__':
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
