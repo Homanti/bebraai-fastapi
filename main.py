@@ -1,4 +1,4 @@
-import uvicorn
+# import uvicorn
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -84,5 +84,5 @@ async def api_messages(
     except Exception as e:
         return {"error": str(e)}
 
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+# if __name__ == "__main__":
+#     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
