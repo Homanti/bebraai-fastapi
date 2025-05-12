@@ -14,7 +14,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -76,6 +76,9 @@ async def api_messages(
             for f in files:
                 content = await f.read()
                 processed_files.append([content, f.filename])
+
+        print("FILES:", [f.filename for f in files])
+        print("MESSAGES:", messages)
 
         return StreamingResponse(
             text_generation(parsed_messages, processed_files),
