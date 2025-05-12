@@ -60,8 +60,6 @@ async def text_generation(messages: List[Dict], files) -> AsyncGenerator[str, No
                 content = delta.content
                 yield json.dumps({"content": content, "role": "assistant"}) + "\n"
 
-
-# Основной endpoint
 @app.post("/api/messages")
 async def api_messages(
     messages: str = Form(...),
