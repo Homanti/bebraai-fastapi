@@ -2,3 +2,4 @@ uvicorn
 fastapi[all]
 g4f[all]
 typing-extensions
+hypercorn
