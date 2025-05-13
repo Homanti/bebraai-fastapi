@@ -1,4 +1,3 @@
-# import uvicorn
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -44,11 +43,11 @@ Whenever you include a mathematical expression, always use proper LaTeX syntax:
 6. All non-math content should follow standard Markdown formatting (headings, lists, links, emphasis, etc.).
 """
 
-async def text_generation(messages: List[Dict], files) -> AsyncGenerator[str, None]:
+async def text_generation(messages: List[Dict], model, files) -> AsyncGenerator[str, None]:
     client = AsyncClient()
 
     stream = client.chat.completions.stream(
-        model="gpt-4o",
+        model=model,
         provider=PollinationsAI,
         messages=[{"content": system_prompt, "role": "system"}] + messages,
         images=files,
@@ -65,6 +64,7 @@ async def text_generation(messages: List[Dict], files) -> AsyncGenerator[str, No
 @app.post("/api/messages")
 async def api_messages(
     messages: str = Form(...),
+    model: str = Form(...),
     files: List[UploadFile] = File(default=[])
 ):
     try:
@@ -76,7 +76,7 @@ async def api_messages(
             processed_files.append([content, f.filename])
 
         return StreamingResponse(
-            text_generation(parsed_messages, processed_files),
+            text_generation(parsed_messages, model, processed_files),
             media_type="application/jsonlines"
         )
 
@@ -84,4 +84,5 @@ async def api_messages(
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
 # if __name__ == '__main__':
+#     import uvicorn
 #     uvicorn.run(app, host="0.0.0.0", port=8000)
