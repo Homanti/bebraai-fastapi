@@ -43,28 +43,34 @@ Whenever you include a mathematical expression, always use proper LaTeX syntax:
 6. All non-math content should follow standard Markdown formatting (headings, lists, links, emphasis, etc.).
 """
 
-async def text_generation(messages: List[Dict], model, files) -> AsyncGenerator[str, None]:
+async def generation(messages: List[Dict], model, mods, files) -> AsyncGenerator[str, None]:
+    parsed_mods = json.loads(mods)
     client = AsyncClient()
 
-    stream = client.chat.completions.stream(
-        model=model,
-        provider=PollinationsAI,
-        messages=[{"content": system_prompt, "role": "system"}] + messages,
-        images=files,
-        web_search=False,
-    )
+    if not parsed_mods.get("draw", False):
+        try:
+            stream = client.chat.completions.stream(
+                model=model,
+                provider=PollinationsAI,
+                messages=[{"content": system_prompt, "role": "system"}] + messages,
+                images=files,
+                web_search=parsed_mods.get("web_search", False)
+            )
 
-    async for chunk in stream:
-        if hasattr(chunk, "choices") and chunk.choices:
-            delta = chunk.choices[0].delta
-            if hasattr(delta, "content") and delta.content:
-                content = delta.content
-                yield json.dumps({"content": content, "role": "assistant"}) + "\n"
+            async for chunk in stream:
+                if hasattr(chunk, "choices") and chunk.choices:
+                    delta = chunk.choices[0].delta
+                    if hasattr(delta, "content") and delta.content:
+                        content = delta.content
+                        yield json.dumps({"content": content, "role": "assistant"}) + "\n"
+        except Exception as e:
+            yield json.dumps({"error": str(e)}) + "\n"
 
-@app.post("/api/messages")
-async def api_messages(
+@app.post("/api/stream/generate")
+async def generate_stream(
     messages: str = Form(...),
     model: str = Form(...),
+    mods: str = Form(...),
     files: List[UploadFile] = File(default=[])
 ):
     try:
@@ -76,7 +82,7 @@ async def api_messages(
             processed_files.append([content, f.filename])
 
         return StreamingResponse(
-            text_generation(parsed_messages, model, processed_files),
+            generation(parsed_messages, model, mods, processed_files),
             media_type="application/jsonlines"
         )
 
