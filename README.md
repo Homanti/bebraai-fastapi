@@ -19,24 +19,17 @@
 ## ⚙️ Установка и запуск
 
 ```bash
-git clone https://github.com/Homanti/bebraai.git
-cd BebraAI
-npm install
-npm run dev
+git clone git@github.com:Homanti/bebraai-fastapi.git
+cd bebraai-fastapi
+pip install -r requirements.txt
+python main.py
 ```
 
 ---
 
 ## 🧩 Основные зависимости
 
-- **[React](https://reactjs.org/)** — библиотека для построения пользовательских интерфейсов
-- **[Vite](https://vitejs.dev/)** — современный сборщик и dev-сервер
-- **[zustand](https://github.com/pmndrs/zustand)** — легковесный менеджер состояния
-- **[react-i18next](https://react.i18next.com/)** + **i18next-browser-languagedetector** — мультиязычность
-- **[react-router-dom](https://reactrouter.com/)** — маршрутизация
-- **[motion](https://motion.dev/)** — анимации
-- **[lucide-react](https://lucide.dev/)** — SVG-иконки
-- **[react-markdown](https://github.com/remarkjs/react-markdown)**, **remark-math**, **rehype-katex** — Markdown + математическая разметка
+- **[FastAPI](https://fastapi.tiangolo.com/)** — главная серверная библиотека
 - **[g4f](https://github.com/xtekky/gpt4free)** — библиотека для обхода платного API OpenAI
 
 ---
