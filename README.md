@@ -19,7 +19,7 @@
 ## ⚙️ Установка и запуск
 
 ```bash
-git clone git@github.com:Homanti/bebraai-fastapi.git
+git clone https://github.com/Homanti/bebraai-fastapi.git
 cd bebraai-fastapi
 pip install -r requirements.txt
 python main.py
