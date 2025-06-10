@@ -68,13 +68,18 @@ def get_image_base64(url):
     response = requests.get(url)
     response.raise_for_status()
 
+    content_type = response.headers.get("Content-Type", "image/png")
+
     content_disposition = response.headers.get("Content-Disposition")
     if content_disposition and "filename=" in content_disposition:
         filename = content_disposition.split("filename=")[1].strip("\"")
     else:
         filename = os.path.basename(url.split("?")[0]) or "image.png"
 
-    return [response.content, filename]
+    base64_encoded = base64.b64encode(response.content).decode("utf-8")
+    data_url = f"data:{content_type};base64,{base64_encoded}"
+
+    return [data_url, filename]
 
 async def generation(messages: List[Dict], model, mods, files_url) -> AsyncGenerator[str, None]:
     parsed_mods = json.loads(mods)
