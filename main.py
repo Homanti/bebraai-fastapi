@@ -87,8 +87,8 @@ async def generation(messages: List[Dict], model, mods, files_url) -> AsyncGener
 
     images = []
     try:
-        image = get_image_base64(files_url)
-        images.append(image)
+        data_url, filename = get_image_base64(files_url)
+        images.append([data_url, filename])
     except Exception as e:
         print("error image loading: ", files_url, str(e))
 
