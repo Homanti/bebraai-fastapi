@@ -1,6 +1,7 @@
-fastapi
+fastapi[all]
 uvicorn
 g4f[all]
 boto3
 requests
 hypercorn
+typing-extensions

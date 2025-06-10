@@ -68,23 +68,24 @@ def get_image_base64(url):
     response = requests.get(url)
     response.raise_for_status()
 
-    content_type = response.headers.get('Content-Type')
-    if not content_type or not content_type.startswith('image/'):
-        raise ValueError('URL does not point to an image')
+    content_disposition = response.headers.get("Content-Disposition")
+    if content_disposition and "filename=" in content_disposition:
+        filename = content_disposition.split("filename=")[1].strip("\"")
+    else:
+        filename = os.path.basename(url.split("?")[0]) or "image.png"
 
-    image_data = response.content
-    base64_encoded = base64.b64encode(image_data).decode('utf-8')
-    data_url = f"data:{content_type};base64,{base64_encoded}"
-    return data_url
+    return [response.content, filename]
 
 async def generation(messages: List[Dict], model, mods, files_url) -> AsyncGenerator[str, None]:
     parsed_mods = json.loads(mods)
     client = AsyncClient()
 
     images = []
-    for url in files_url:
-        base64_image = get_image_base64(url)
-        images.append(base64_image)
+    try:
+        image = get_image_base64(files_url)
+        images.append(image)
+    except Exception as e:
+        print("error image loading: ", files_url, str(e))
 
     print(images)
 
