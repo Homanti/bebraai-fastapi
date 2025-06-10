@@ -3,3 +3,4 @@ uvicorn
 g4f
 boto3
 requests
+hypercorn
