@@ -91,9 +91,7 @@ async def generation(messages: List[Dict], model, mods, files_url) -> AsyncGener
             data_url, filename = get_image_base64(url)
             images.append([data_url, filename])
         except Exception as e:
-            print("❌ error image loading:", url, str(e))
-
-    print(images)
+            print("Error image loading:", url, str(e))
 
     if not parsed_mods.get("draw", False):
         try:
@@ -170,6 +168,6 @@ async def upload_file(file: UploadFile = File(...)):
     public_url = f"https://pub-bbbd9fe0ee484f02954722c5d466e7c0.r2.dev/{filename}"
     return {"url": public_url}
 
-if __name__ == '__main__':
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# if __name__ == '__main__':
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
