@@ -1,7 +1,6 @@
 fastapi
 uvicorn
-g4f
+g4f[all]
 boto3
 requests
 hypercorn
-python-multipart
