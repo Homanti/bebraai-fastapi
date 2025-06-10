@@ -4,3 +4,4 @@ g4f
 boto3
 requests
 hypercorn
+python-multipart
