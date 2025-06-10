@@ -161,6 +161,6 @@ async def upload_file(file: UploadFile = File(...)):
     public_url = f"https://pub-bbbd9fe0ee484f02954722c5d466e7c0.r2.dev/{filename}"
     return {"url": public_url}
 
-if __name__ == '__main__':
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# if __name__ == '__main__':
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
