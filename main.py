@@ -12,15 +12,18 @@ from typing import List, Dict, AsyncGenerator
 from botocore.client import Config
 from g4f import AsyncClient
 from g4f.Provider import PollinationsAI
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 app = FastAPI()
 
 # -------------------- CONFIG --------------------
-R2_ACCESS_KEY_ID = "8c79b2dd67ba7ffe39bf8c793a184936"
-R2_SECRET_ACCESS_KEY = "b28fb6432d92288f528618405d6b4dd6582c0096fb286c50e237f8cb5428a3f3"
-R2_BUCKET_NAME = "bebraai"
-R2_ENDPOINT_URL = "https://f720b16b60c09e5011578d67e56ed282.r2.cloudflarestorage.com"
-R2_PUBLIC_URL = "https://pub-bbbd9fe0ee484f02954722c5d466e7c0.r2.dev"
+R2_ACCESS_KEY_ID = os.environ.get("R2_ACCESS_KEY_ID")
+R2_SECRET_ACCESS_KEY = os.environ.get("R2_SECRET_ACCESS_KEY")
+R2_BUCKET_NAME = os.environ.get("R2_BUCKET_NAME")
+R2_ENDPOINT_URL = os.environ.get("R2_ENDPOINT_URL")
+R2_PUBLIC_URL = os.environ.get("R2_PUBLIC_URL")
 
 ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
