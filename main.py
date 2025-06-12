@@ -25,7 +25,19 @@ R2_BUCKET_NAME = os.environ.get("R2_BUCKET_NAME")
 R2_ENDPOINT_URL = os.environ.get("R2_ENDPOINT_URL")
 R2_PUBLIC_URL = os.environ.get("R2_PUBLIC_URL")
 
-ALLOWED_CONTENT_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
+ALLOWED_CONTENT_TYPES = {
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "image/bmp",
+    "image/svg+xml",
+    ".jpeg",
+    ".jpg",
+    ".png",
+    ".bmp",
+    ".webp",
+    ".svg"
+}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
 session = boto3.session.Session()
