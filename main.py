@@ -73,8 +73,6 @@ for example:
 ```python filename="main.py"
 print("hello world")
 ```
-
-if the code does not require any file name, you can not add filename
 """
 
 # -------------------- UTILITY FUNCTIONS --------------------
