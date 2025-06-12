@@ -65,8 +65,8 @@ Whenever you include a mathematical expression, always use proper LaTeX syntax:
 
 If you write any code, then be sure to write it in this format
 
-```(language name) filename="(filename)"
-(code)
+```<language name> filename="<filename>"
+<code>
 ```
 
 for example:
