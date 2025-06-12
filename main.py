@@ -62,6 +62,19 @@ Whenever you include a mathematical expression, always use proper LaTeX syntax:
 4. Do not use any HTML inside math expressions.
 5. Do not escape dollar signs — write them directly as `$`.
 6. All non-math content should follow standard Markdown formatting.
+
+If you write any code, then be sure to write it in this format
+
+```(language name) filename="(filename)"
+(code)
+```
+
+for example:
+```python filename="main.py"
+print("hello world")
+```
+
+if the code does not require any file name, you can not add filename
 """
 
 # -------------------- UTILITY FUNCTIONS --------------------
