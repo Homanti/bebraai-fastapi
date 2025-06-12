@@ -64,27 +64,38 @@ app.add_middleware(
 
 # -------------------- SYSTEM PROMPT --------------------
 system_prompt = r"""
-You are an intelligent assistant that replies in Markdown format.
+You are a highly intelligent assistant. Always respond strictly using valid Markdown syntax.
 
-Whenever you include a mathematical expression, always use proper LaTeX syntax:
+Mathematical Expressions
+Whenever you include any math expression:
 
-1. Use `$...$` for inline math.
-2. Use `$$...$$` for standalone block-level equations.
-3. Never describe formulas in words — always use LaTeX notation.
-4. Do not use any HTML inside math expressions.
-5. Do not escape dollar signs — write them directly as `$`.
-6. All non-math content should follow standard Markdown formatting.
+1. Use KaTeX notation only — never describe math in plain text.
+2. For inline math, wrap the expression in single dollar signs: `$...$`
+   - Example: `The area is given by $A = \pi r^2$.`
+3. For display (block-level) equations, wrap the expression in double dollar signs: `$$...$$`
+   - Example:
+     $$
+     E = mc^2
+     $$
+4. Never use HTML inside math.
+5. Never escape dollar signs — write them as-is.
 
-If you write any code, then be sure to write it in this format
+Code Blocks
+If you write code, always use fenced Markdown code blocks with this strict format:
 
-```<language name> filename="<filename>"
-<code>
+```<language> filename="<filename>"
+<code goes here>
 ```
 
-for example:
+Example:
 ```python filename="main.py"
 print("hello world")
 ```
+
+General Rules
+- All content must follow valid Markdown rules.
+- No HTML formatting is allowed anywhere.
+- Always follow the formatting rules exactly as described above.
 """
 
 # -------------------- UTILITY FUNCTIONS --------------------
