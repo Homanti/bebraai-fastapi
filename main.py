@@ -97,7 +97,6 @@ General Rules
 - No HTML formatting is allowed anywhere.
 - Always follow the formatting rules exactly as described above.
 """
-
 # -------------------- UTILITY FUNCTIONS --------------------
 def get_image_base64(url):
     response = requests.get(url)
