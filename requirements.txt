@@ -6,3 +6,4 @@ requests
 hypercorn
 typing-extensions
 python-dotenv
+pydub

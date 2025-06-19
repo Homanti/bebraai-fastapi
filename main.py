@@ -2,6 +2,7 @@ import uuid
 import json
 import base64
 import urllib.parse
+import g4f
 import requests
 import boto3
 from fastapi import FastAPI, File, Form, UploadFile, HTTPException
@@ -13,6 +14,8 @@ from g4f import AsyncClient
 from g4f.Provider import PollinationsAI
 import os
 from dotenv import load_dotenv
+from pydub import AudioSegment
+from io import BytesIO
 load_dotenv()
 
 app = FastAPI()
@@ -270,12 +273,36 @@ async def generate_image(prompt: str = Form(...)):
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
 
+@app.post("/api/audio/transcript")
+async def generate_transcript(audio: UploadFile = File(...)):
+    original_audio = await audio.read()
+    audio_format = audio.filename.split('.')[-1].lower()
+
+    audio_segment = AudioSegment.from_file(BytesIO(original_audio), format=audio_format)
+
+    output_filename = "audio.mp3"
+    audio_segment.export(output_filename, format="mp3")
+
+    client = AsyncClient(provider=PollinationsAI)
+
+    with open(output_filename, "rb") as f:
+        response = await client.chat.completions.create(
+            model=g4f.models.default,
+            messages=[{"role": "user", "content": "Transcribe this audio on original language"}],
+            media=[[f, "audio.mp3"]],
+            modalities=["text"],
+        )
+
+    os.remove(output_filename)
+
+    return {"text": response.choices[0].message.content}
+
 @app.post("/files/upload/")
 async def upload_file(file: UploadFile = File(...)):
     image_url = await upload_file_to_r2(file)
     return {"image_url": image_url}
 
 # -------------------- RUN (optional) --------------------
-# if __name__ == "__main__":
-#     import uvicorn
-#     uvicorn.run(app, host="0.0.0.0", port=8000)
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
