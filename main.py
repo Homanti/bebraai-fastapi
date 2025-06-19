@@ -1,4 +1,3 @@
-import os
 import uuid
 import json
 import base64
@@ -151,7 +150,7 @@ async def upload_image_bytes_to_r2(content: bytes, ext=".png", content_type="ima
     return f"{R2_PUBLIC_URL}/{urllib.parse.quote(filename)}"
 
 # -------------------- MAIN LOGIC --------------------
-async def text_generation(messages: List[Dict], model: str, files_url: List[str], web_search: bool) -> AsyncGenerator[str, None]:
+async def text_generation(messages: List[Dict], model: str, provider: str, files_url: List[str], web_search: bool) -> AsyncGenerator[str, None]:
     web_search = str(web_search).lower() == "true"
     client = AsyncClient()
 
@@ -164,13 +163,51 @@ async def text_generation(messages: List[Dict], model: str, files_url: List[str]
             print("Error loading image:", url, str(e))
 
     try:
-        stream = client.chat.completions.stream(
-            model=model,
-            provider=PollinationsAI,
-            messages=[{"content": system_prompt, "role": "system"}] + messages,
-            images=images,
-            web_search=web_search
-        )
+        providers_list = {
+            "PollinationsAI": PollinationsAI,
+        }
+
+        if provider in providers_list:
+            provider = providers_list[provider]
+        else:
+            provider = PollinationsAI
+            model = "gpt-4o"
+
+        tool_calls = []
+        if web_search:
+            tool_calls = [
+                {
+                    "function": {
+                        "arguments": {
+                            "query": messages[-1]["content"],
+                            "max_results": 5,
+                            "max_words": 2500,
+                            "backend": "html",
+                            "add_text": True,
+                            "timeout": 100
+                        },
+                        "name": "search_tool"
+                    },
+                    "type": "function"
+                }
+            ]
+
+        try:
+            stream = client.chat.completions.stream(
+                model=model,
+                provider=provider,
+                messages=[{"content": system_prompt, "role": "system"}] + messages,
+                images=images,
+                tool_calls=tool_calls,
+            )
+        except: # костыли
+            stream = client.chat.completions.stream(
+                model=model,
+                provider=provider,
+                messages=[{"content": system_prompt, "role": "system"}] + messages,
+                images=images,
+                tool_calls=tool_calls,
+            )
 
         async for chunk in stream:
             if hasattr(chunk, "choices") and chunk.choices:
@@ -179,6 +216,7 @@ async def text_generation(messages: List[Dict], model: str, files_url: List[str]
                     yield json.dumps({"content": delta.content, "role": "assistant"}) + "\n"
 
     except Exception as e:
+        print("Error generating text:", str(e))
         yield json.dumps({"error": str(e)}) + "\n"
 
 async def image_generation(prompt: str) -> str:
@@ -204,6 +242,7 @@ async def image_generation(prompt: str) -> str:
 async def generate_stream(
     messages: str = Form(...),
     model: str = Form(...),
+    provider: str = Form(...),
     web_search: str = Form(...),
     files_url: List[str] = Form(default=[])
 ):
@@ -215,7 +254,7 @@ async def generate_stream(
             raise HTTPException(status_code=400, detail="Max 10 images allowed.")
 
         return StreamingResponse(
-            text_generation(parsed_messages, model, files_url, web_search),
+            text_generation(parsed_messages, model, provider, files_url, web_search),
             media_type="application/jsonlines",
             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"}
         )
