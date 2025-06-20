@@ -2,7 +2,7 @@ import uuid
 import json
 import base64
 import urllib.parse
-import g4f
+import assemblyai as aai
 import requests
 import boto3
 from fastapi import FastAPI, File, Form, UploadFile, HTTPException
@@ -26,6 +26,7 @@ R2_SECRET_ACCESS_KEY = os.environ.get("R2_SECRET_ACCESS_KEY")
 R2_BUCKET_NAME = os.environ.get("R2_BUCKET_NAME")
 R2_ENDPOINT_URL = os.environ.get("R2_ENDPOINT_URL")
 R2_PUBLIC_URL = os.environ.get("R2_PUBLIC_URL")
+AAI_API_KEY = os.environ.get("AAI_API_KEY")
 
 ALLOWED_CONTENT_TYPES = {
     "image/jpeg",
@@ -283,19 +284,17 @@ async def generate_transcript(audio: UploadFile = File(...)):
     output_filename = "audio.mp3"
     audio_segment.export(output_filename, format="mp3")
 
-    client = AsyncClient(provider=PollinationsAI)
+    aai.settings.api_key = AAI_API_KEY
+    config = aai.TranscriptionConfig(speech_model=aai.SpeechModel.best, language_detection=True)
 
-    with open(output_filename, "rb") as f:
-        response = await client.chat.completions.create(
-            model=g4f.models.default,
-            messages=[{"role": "user", "content": "Transcribe this audio on original language"}],
-            media=[[f, "audio.mp3"]],
-            modalities=["text"],
-        )
+    transcript = aai.Transcriber(config=config).transcribe(output_filename)
+
+    if transcript.status == "error":
+        raise RuntimeError(f"Transcription failed: {transcript.error}")
 
     os.remove(output_filename)
 
-    return {"text": response.choices[0].message.content}
+    return {"text": transcript.text}
 
 @app.post("/files/upload/")
 async def upload_file(file: UploadFile = File(...)):
