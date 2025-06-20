@@ -7,3 +7,4 @@ hypercorn
 typing-extensions
 python-dotenv
 pydub
+assemblyai

@@ -302,6 +302,6 @@ async def upload_file(file: UploadFile = File(...)):
     return {"image_url": image_url}
 
 # -------------------- RUN (optional) --------------------
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+# if __name__ == "__main__":
+#     import uvicorn
+#     uvicorn.run(app, host="0.0.0.0", port=8000)
