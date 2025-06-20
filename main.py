@@ -199,7 +199,7 @@ async def text_generation(messages: List[Dict], model: str, provider: str, files
         try:
             stream = client.chat.completions.stream(
                 model=model,
-                # provider=provider,
+                provider=provider,
                 messages=[{"content": system_prompt, "role": "system"}] + messages,
                 images=images,
                 tool_calls=tool_calls,
