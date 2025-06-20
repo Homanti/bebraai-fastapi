@@ -59,6 +59,7 @@ app.add_middleware(
         "http://localhost:5173",
         "http://192.168.0.194:5173",
         "https://bebraai-production.up.railway.app",
+        "https://bebraai.com"
     ],
     allow_credentials=True,
     allow_methods=["*"],
